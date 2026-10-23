@@ -18,13 +18,13 @@ class TrainingConfig:
     # Dataset & Preprocessing
     dataset_name: str = "islomov/news_youtube_uzbek_speech_dataset"
     dataset_config: Optional[str] = None
-    target_duration_seconds: float = 3600.0  # 1 hour
+    target_duration_seconds: Optional[float] = None  # None for full dataset or float seconds for subset experiments
     sampling_rate: int = 16000
     test_size: float = 0.2
     random_seed: int = 42
 
     # Hardware & Training
-    output_dir: str = "./whisper-small-uzbek-1h"
+    output_dir: str = "./whisper-small-uzbek"
     per_device_train_batch_size: int = 8
     per_device_eval_batch_size: int = 8
     gradient_accumulation_steps: int = 2
@@ -47,7 +47,7 @@ class TrainingConfig:
     # Hugging Face Hub Integration
     push_to_hub: bool = True
     hub_model_id: Optional[str] = field(
-        default_factory=lambda: os.getenv("HF_HUB_MODEL_ID", None)
+        default_factory=lambda: os.getenv("HF_HUB_MODEL_ID", "ZaaX19/whisper-small-uzbek")
     )
     hf_token: Optional[str] = field(
         default_factory=lambda: os.getenv("HF_TOKEN", None)

@@ -29,8 +29,11 @@ venv/
 env/
 ENV/
 .venv/
+env.bak/
+venv.bak/
 
 # Hugging Face & Model Checkpoints
+whisper-small-uzbek/
 whisper-small-uzbek-*/
 checkpoints/
 checkpoint-*/
@@ -40,16 +43,35 @@ wandb/
 .cache/
 huggingface/
 
+# Audio files (raw recordings / local test samples)
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.ogg
+
 # Sensitive files & Tokens
 .env
+.env.*
 *.token
 HF_TOKEN
 secrets.json
 
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
-
-# OS generated
-.DS_Store
-Thumbs.db

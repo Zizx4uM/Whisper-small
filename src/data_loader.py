@@ -1,8 +1,8 @@
-"""Dataset loading, audio slicing, and feature extraction for Uzbek speech recognition."""
+"""Dataset loading, audio preprocessing, and feature extraction for Uzbek speech recognition."""
 
 import logging
 from typing import Tuple, Dict, Any
-from datasets import load_dataset, Audio, DatasetDict, Dataset
+from datasets import load_dataset, Audio, DatasetDict
 from transformers import WhisperFeatureExtractor, WhisperTokenizer, WhisperProcessor
 
 from src.config import TrainingConfig
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def load_and_slice_dataset(config: TrainingConfig) -> Tuple[DatasetDict, WhisperProcessor]:
     """
-    Loads Uzbek speech dataset, slices ~1 hour of audio, and extracts Whisper features.
+    Loads Uzbek speech dataset, prepares audio samples, and extracts Whisper features.
 
     Args:
         config: TrainingConfig object containing hyperparameters and paths.
@@ -37,25 +37,26 @@ def load_and_slice_dataset(config: TrainingConfig) -> Tuple[DatasetDict, Whisper
     logger.info("Resampling audio to %d Hz...", config.sampling_rate)
     raw_dataset = raw_dataset.cast_column("audio", Audio(sampling_rate=config.sampling_rate))
 
-    # Slice 1 hour (target_duration_seconds)
-    logger.info("Selecting audio samples up to %.1f seconds (~%.1f hours)...",
-                config.target_duration_seconds, config.target_duration_seconds / 3600.0)
+    # Slice subset if target_duration_seconds is specified, otherwise use entire dataset
+    if config.target_duration_seconds is not None and config.target_duration_seconds > 0:
+        logger.info("Selecting audio samples up to %.1f seconds...", config.target_duration_seconds)
+        selected_indices = []
+        total_duration_sec = 0.0
 
-    selected_indices = []
-    total_duration_sec = 0.0
+        for idx, sample in enumerate(raw_dataset):
+            audio_array = sample["audio"]["array"]
+            duration = len(audio_array) / config.sampling_rate
+            if total_duration_sec + duration > config.target_duration_seconds:
+                break
+            total_duration_sec += duration
+            selected_indices.append(idx)
 
-    for idx, sample in enumerate(raw_dataset):
-        audio_array = sample["audio"]["array"]
-        duration = len(audio_array) / config.sampling_rate
-        if total_duration_sec + duration > config.target_duration_seconds:
-            break
-        total_duration_sec += duration
-        selected_indices.append(idx)
-
-    logger.info("Sliced %d samples totaling %.2f minutes (%.2f seconds).",
-                len(selected_indices), total_duration_sec / 60.0, total_duration_sec)
-
-    subset = raw_dataset.select(selected_indices)
+        logger.info("Selected %d samples totaling %.2f minutes (%.2f seconds).",
+                    len(selected_indices), total_duration_sec / 60.0, total_duration_sec)
+        subset = raw_dataset.select(selected_indices)
+    else:
+        logger.info("Using full dataset (%d samples).", len(raw_dataset))
+        subset = raw_dataset
 
     # Train / Test split
     split_datasets = subset.train_test_split(

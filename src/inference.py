@@ -1,4 +1,4 @@
-"""Simple CLI and programmatic inference module for fine-tuned Whisper Uzbek model."""
+"""CLI and programmatic inference module for fine-tuned Whisper Uzbek model."""
 
 import argparse
 import sys
@@ -10,7 +10,7 @@ from transformers import pipeline
 
 def transcribe_audio(
     audio_path: str,
-    model_id: str = "ZaaX19/whisper-small-uzbek-1h",
+    model_id: str = "ZaaX19/whisper-small-uzbek",
     language: str = "uzbek",
     device: Optional[str] = None,
 ) -> str:
@@ -45,11 +45,11 @@ def transcribe_audio(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Transcribe Uzbek audio using fine-tuned Whisper-Small")
-    parser.add_argument("--audio", type=str, required=True, help="Path to audio file (mp3, wav, etc.)")
+    parser.add_argument("--audio", type=str, required=True, help="Path to audio file (mp3, wav, flac, etc.)")
     parser.add_argument(
         "--model_id",
         type=str,
-        default="ZaaX19/whisper-small-uzbek-1h",
+        default="ZaaX19/whisper-small-uzbek",
         help="HF model ID or local checkpoint path",
     )
     parser.add_argument(
